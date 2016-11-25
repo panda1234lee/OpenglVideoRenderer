@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 	int w = 643, h = 480;
 
 	FFmpegDecoder * decoder = FFmpegDecoder::getInstance();
-	decoder->init("../video/ink.mov", w, h);	// 有的mp4格式会莫名卡顿
+	decoder->init("../video/ink.mov", w, h);	// shining_particle.mov, ink.mov  [有的mp4格式会莫名卡顿]
 	
 	w = decoder->getDstWidth();
 	h = decoder->getDstHeight();
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	gluth->init(&argc, argv, w, h);
 
 	GlHelper* glh = GlHelper::getInstance();
-	const char* vs_path = "../Shaders/Shader_2/vertex_shader.glsl";
+	const char* vs_path = "../Shaders/Shader_2/vertex_shader.glsl";	// Shader_3
 	const char* fs_path = "../Shaders/Shader_2/fragment_shader.glsl";
 	glh->init(w, h, vs_path, fs_path) ;
 
