@@ -6,26 +6,25 @@
 #include "GlHelper.h"
 #include "FFmpegDecoder.h"
 
-//typedef  char  GLchar;
-
 #include <iostream>
 #include <fstream>
 #include <string>
 
 int main(int argc, char *argv[])
 {
-	int w = 640, h = 480;
-	FFmpegDecoder * decoder = new FFmpegDecoder();
-	decoder->init("../video/test.mov", w, h);	// 有的mp4格式会莫名卡顿
-	
-	//w = decoder->getWidth();
-	//h = decoder->getHeight();
+	int w = 643, h = 480;
 
-	GlutHelper* gluth = new GlutHelper();
+	FFmpegDecoder * decoder = FFmpegDecoder::getInstance();
+	decoder->init("../video/ink.mov", w, h);	// 有的mp4格式会莫名卡顿
+	
+	w = decoder->getDstWidth();
+	h = decoder->getDstHeight();
+
+	GlutHelper* gluth = GlutHelper::getInstance();
 	gluth->setFFmpegDecoder(decoder);
 	gluth->init(&argc, argv, w, h);
 
-	GlHelper* glh = new GlHelper();
+	GlHelper* glh = GlHelper::getInstance();
 	const char* vs_path = "../Shaders/Shader_2/vertex_shader.glsl";
 	const char* fs_path = "../Shaders/Shader_2/fragment_shader.glsl";
 	glh->init(w, h, vs_path, fs_path) ;

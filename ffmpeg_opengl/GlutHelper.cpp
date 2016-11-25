@@ -1,7 +1,7 @@
 ﻿#include "stdafx.h"
 #include "GlutHelper.h"
 
-
+GlutHelper* GlutHelper::s_instance = NULL;
 GlHelper* GlutHelper::s_glh = NULL;
 FFmpegDecoder* GlutHelper::s_decoder = NULL;
 bool GlutHelper::s_running = true;
@@ -34,13 +34,18 @@ void GlutHelper::display()
 
 	// run the application mainloop
 	//clock_t start = clock();
-	bool res = s_decoder->readFrame();
+	bool res = s_decoder->readAVFrame();
 	//clock_t end = clock();
 	//printf("readFrame = %d ms \n", end - start);
 
 	if(res) 
 	{
 		//clock_t start = clock();
+		s_glh->deliverDataToTexture(
+			s_decoder->getDstWidth(), 
+			s_decoder->getDstHeight(), 
+			s_decoder->getGLFrameData());
+
 		s_glh->drawFrame();
 		//clock_t end = clock();
 		//printf("drawframe = %d ms \n", end - start);
@@ -50,13 +55,11 @@ void GlutHelper::display()
 
 	if( !res || !s_running)
 	{
-		delete s_glh;
-		s_glh = NULL;
+		s_glh->release();
 
 		// close
 		s_decoder->close();
-		delete s_decoder;
-		s_decoder = NULL;
+		s_decoder->release();
 
 		glutLeaveMainLoop();
 		//exit(0);

@@ -9,8 +9,22 @@
 class GlutHelper
 {
 public:
-	GlutHelper();
-	~GlutHelper();
+	static GlutHelper* getInstance()
+	{
+		if (!s_instance)
+		{
+			s_instance = new GlutHelper();
+		}
+
+		return s_instance;
+	}
+
+	static void release()
+	{
+		if(s_instance)
+			delete s_instance;
+		s_instance = NULL;
+	}
 
 	inline void init(int *argc, char *argv[], int width, int height)
 	{
@@ -84,8 +98,12 @@ public:
 
 	// ‰÷»æ∑Ω∑®
 	static void display();
+private:
+	GlutHelper();
+	~GlutHelper();
 
 private:
+	static GlutHelper *s_instance;
 	static GlHelper *s_glh;
 	static FFmpegDecoder * s_decoder;
 	static bool s_running;

@@ -5,6 +5,8 @@
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
+GlHelper* GlHelper::s_instance = NULL;
+
 // attribute indices
 enum
 {

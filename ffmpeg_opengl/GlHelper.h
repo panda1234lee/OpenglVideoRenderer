@@ -11,8 +11,22 @@ class GlHelper
 {
 public:
 
-    GlHelper();
-    ~GlHelper();
+	static GlHelper* getInstance()
+	{
+		if (!s_instance)
+		{
+			s_instance = new GlHelper();
+		}
+
+		return s_instance;
+	}
+
+	static void release()
+	{
+		if(s_instance)
+			delete s_instance;
+		s_instance = NULL;
+	}
 
 	int init(int width, int height, const char* vs_path, const char* fs_path);
 	void initVAO();
@@ -32,6 +46,9 @@ public:
     }
 
 private:
+	GlHelper();
+	~GlHelper();
+
 	bool buildShader(std::string const &shader_source, GLuint &shader, GLenum type);
 	bool buildProgram();
 
@@ -46,5 +63,7 @@ private:
 
     std::string m_vert_shader_source;
     std::string m_frag_shader_source;
+
+	static GlHelper* s_instance;
 };
 
