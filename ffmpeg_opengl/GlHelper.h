@@ -3,10 +3,6 @@
 #include <GL/glew.h>
 #include <string>
 
-//#define GLFW_INCLUDE_GL3
-//#define GLFW_NO_GLU
-//#include <GL/glfw.h>
-//
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -19,6 +15,9 @@ public:
     ~GlHelper();
 
 	int init(int width, int height, const char* vs_path, const char* fs_path);
+	void initVAO();
+	void initTexture(int width, int height);
+	void initMatrix();
     void drawFrame();
     void clear();
 

@@ -14,12 +14,12 @@
 
 int main(int argc, char *argv[])
 {
-
+	int w = 640, h = 480;
 	FFmpegDecoder * decoder = new FFmpegDecoder();
-	decoder->init("../video/ink.mov");
-	int w, h;
-	w = decoder->getWidth();
-	h = decoder->getHeight();
+	decoder->init("../video/test.mov", w, h);	// 有的mp4格式会莫名卡顿
+	
+	//w = decoder->getWidth();
+	//h = decoder->getHeight();
 
 	GlutHelper* gluth = new GlutHelper();
 	gluth->setFFmpegDecoder(decoder);

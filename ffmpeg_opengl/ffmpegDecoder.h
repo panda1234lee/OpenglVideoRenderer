@@ -17,7 +17,7 @@ public:
 	FFmpegDecoder();
 	~FFmpegDecoder();
 
-	int init(const char* file_name);
+	int init(const char* file_name, int dst_w, int dst_h);
 	int findStream();
 	int findAndOpenCodec();
 	void makeFrame(AVFrame** frame, int width, int height);
@@ -40,6 +40,7 @@ public:
 	}
 
 private:
+	int m_dst_w, m_dst_h;
 	int m_stream_idx;
 	AVFormatContext *m_fmt_ctx;
 	AVStream *m_video_stream;

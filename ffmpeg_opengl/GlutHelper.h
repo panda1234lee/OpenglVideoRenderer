@@ -4,7 +4,7 @@
 #include <time.h>
 #include <gl/freeglut.h>
 
-#define TIMER 40
+#define TIMER 20
 
 class GlutHelper
 {
@@ -58,7 +58,11 @@ public:
 	// 定时执行渲染方法
 	inline static void timeFunc(int value)
 	{
+		//clock_t start = clock();
 		display();
+		//clock_t end = clock();
+		//printf("timeFunc = %d ms \n", end - start);
+
 		// 定时循环播放
 		//	间隔value ms，并传入value
 		glutTimerFunc(value, timeFunc, value);
@@ -70,14 +74,6 @@ public:
 		if (key == 27)
 		{
 			s_running = false;
-
-			// clear
-			s_decoder->close();
-			delete s_glh;
-			s_glh = NULL;
-
-			delete s_decoder;
-			s_decoder = NULL;
 		}
 	}
 

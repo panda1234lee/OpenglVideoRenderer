@@ -6,8 +6,6 @@
 
 #define VIDEO_INFO 1
 
-//const char* file_name = "../video/ink.mov";
-
 FFmpegDecoder::FFmpegDecoder()
 {
     m_fmt_ctx = NULL;
@@ -19,13 +17,12 @@ FFmpegDecoder::FFmpegDecoder()
     m_conv_ctx = NULL;
 }
 
-
 FFmpegDecoder::~FFmpegDecoder()
 {
     clear();
 }
 
-int FFmpegDecoder::init(const char *file_name)
+int FFmpegDecoder::init(const char *file_name, int dst_w, int dst_h)
 {
     // initialize libav
     av_register_all();
@@ -48,7 +45,8 @@ int FFmpegDecoder::init(const char *file_name)
 
 	findAndOpenCodec();
 
-    makeFrame(&m_gl_frame, m_codec_ctx->width, m_codec_ctx->height);
+	m_dst_w = dst_w, m_dst_h = dst_h;
+    makeFrame(&m_gl_frame, dst_w, dst_h);
 
     m_packet = (AVPacket *)av_malloc(sizeof(AVPacket));
 }
@@ -152,10 +150,23 @@ void FFmpegDecoder::clear()
 // read a video frame
 bool FFmpegDecoder::readFrame()
 {
+	// 视频结束
     if (av_read_frame(m_fmt_ctx, m_packet) < 0)
     {
-        av_free_packet(m_packet);
-        return false;
+		av_free_packet(m_packet);
+
+		// 从头播放
+		//int64_t time = 3000;	// time ms 处开始播放
+		int64_t time = m_fmt_ctx->start_time;
+		
+		av_seek_frame(m_fmt_ctx, m_stream_idx, time, 0);
+		if (av_read_frame(m_fmt_ctx, m_packet) < 0)
+		{
+			return false;
+			av_free_packet(m_packet);
+		}
+		else
+			return true;
     }
 
     // 如果是视频包
@@ -179,14 +190,22 @@ bool FFmpegDecoder::readFrame()
             {
                 m_conv_ctx = sws_getContext(m_codec_ctx->width,
                                             m_codec_ctx->height, m_codec_ctx->pix_fmt,
-                                            m_codec_ctx->width, m_codec_ctx->height, AV_PIX_FMT_RGB24,
-                                            SWS_BICUBIC, NULL, NULL, NULL);
+                                            m_dst_w,  m_dst_h, AV_PIX_FMT_RGB24,
+                                            SWS_POINT, NULL, NULL, NULL);
             }
 
-            sws_scale(m_conv_ctx, av_frame->data, av_frame->linesize, 0,
-                      m_codec_ctx->height, m_gl_frame->data, m_gl_frame->linesize);
+			//clock_t start = clock();
+			sws_scale(m_conv_ctx, av_frame->data, av_frame->linesize, 0,
+				m_codec_ctx->height, m_gl_frame->data, m_gl_frame->linesize);
+			//clock_t end = clock();
+			//printf("convert = %d ms \n", end - start);
 
-            GlHelper::deliverDataToTexture(m_codec_ctx->width, m_codec_ctx->height, m_gl_frame->data[0]);
+			// ☆
+			//clock_t start = clock();
+			GlHelper::deliverDataToTexture(m_dst_w, m_dst_h, m_gl_frame->data[0]);
+			//clock_t end = clock();
+			//printf("deliver = %d ms \n", end - start);
+
         }
 
         if (av_frame)

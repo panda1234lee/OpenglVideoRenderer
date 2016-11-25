@@ -19,11 +19,9 @@ enum
 	FRAME_TEX
 };
 
-
 GlHelper::GlHelper()
 {
 }
-
 
 GlHelper::~GlHelper()
 {
@@ -45,16 +43,24 @@ int GlHelper::init(int width , int height, const char* vs_path, const char* fs_p
 	if (!buildProgram())
 	{
 		std::cout << "failed to initialize shaders" << std::endl;
-		//glfwTerminate();
 		clear();
 		return -1;
 	}
 	glUseProgram(m_program);
 
+	initVAO();
+	initTexture(width, height);
+	initMatrix();
+
+}
+
+void GlHelper::initVAO()
+{
 	// initialize renderable
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 
+	// Quad
 	glGenBuffers(1, &m_vert_buf);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vert_buf);
 	float quad[20] =
@@ -65,12 +71,16 @@ int GlHelper::init(int width , int height, const char* vs_path, const char* fs_p
 		1.0f,  1.0f, 0.0f, 1.0f, 0.0f
 	};
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
-	glVertexAttribPointer(m_attribs[VERTICES], 3, GL_FLOAT, GL_FALSE, 20,
+	// vertices
+	glVertexAttribPointer(m_attribs[VERTICES], 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat),
 		BUFFER_OFFSET(0));
 	glEnableVertexAttribArray(m_attribs[VERTICES]);
-	glVertexAttribPointer(m_attribs[TEX_COORDS], 2, GL_FLOAT, GL_FALSE, 20,
-		BUFFER_OFFSET(12));
+	// texcoords
+	glVertexAttribPointer(m_attribs[TEX_COORDS], 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat),
+		BUFFER_OFFSET(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(m_attribs[TEX_COORDS]);
+
+	// Index
 	glGenBuffers(1, &m_elem_buf);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elem_buf);
 	unsigned char elem[6] =
@@ -80,7 +90,10 @@ int GlHelper::init(int width , int height, const char* vs_path, const char* fs_p
 	};
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elem), elem, GL_STATIC_DRAW);
 	glBindVertexArray(0);
+}
 
+void GlHelper::initTexture(int width, int height)
+{
 	glActiveTexture(GL_TEXTURE0);
 	glGenTextures(1, &m_frame_tex);
 	glBindTexture(GL_TEXTURE_2D, m_frame_tex);
@@ -91,8 +104,12 @@ int GlHelper::init(int width , int height, const char* vs_path, const char* fs_p
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,	// data.codec_ctx->width, data.codec_ctx->height
 		0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glUniform1i(m_uniforms[FRAME_TEX], 0);
 
+	glUniform1i(m_uniforms[FRAME_TEX], 0);
+}
+
+void GlHelper::initMatrix()
+{
 	glm::mat4 mvp = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
 	glUniformMatrix4fv(m_uniforms[MVP_MATRIX], 1, GL_FALSE, glm::value_ptr(mvp));
 }

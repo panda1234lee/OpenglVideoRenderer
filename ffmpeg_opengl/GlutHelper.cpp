@@ -33,14 +33,31 @@ void GlutHelper::display()
 	}
 
 	// run the application mainloop
+	//clock_t start = clock();
 	bool res = s_decoder->readFrame();
+	//clock_t end = clock();
+	//printf("readFrame = %d ms \n", end - start);
+
 	if(res) 
 	{
+		//clock_t start = clock();
 		s_glh->drawFrame();
+		//clock_t end = clock();
+		//printf("drawframe = %d ms \n", end - start);
+
 		glutSwapBuffers();
 	}
-	else if( !res || !s_running)
+
+	if( !res || !s_running)
 	{
+		delete s_glh;
+		s_glh = NULL;
+
+		// close
+		s_decoder->close();
+		delete s_decoder;
+		s_decoder = NULL;
+
 		glutLeaveMainLoop();
 		//exit(0);
 	}
