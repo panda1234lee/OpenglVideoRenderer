@@ -12,10 +12,10 @@
 
 int main(int argc, char *argv[])
 {
-	int w = 643, h = 480;
+	int w = 640, h = 480;
 
 	FFmpegDecoder * decoder = FFmpegDecoder::getInstance();
-	decoder->init("../video/ink.mov", w, h);	// shining_particle.mov, ink.mov  [有的mp4格式会莫名卡顿]
+	decoder->init("../video/shining_particle.mov", w, h);	// shining_particle.mov, ink.mov  [有的mp4格式会莫名卡顿]
 	
 	w = decoder->getDstWidth();
 	h = decoder->getDstHeight();

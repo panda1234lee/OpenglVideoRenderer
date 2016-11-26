@@ -91,10 +91,11 @@ void GlHelper::initVAO()
 	// Index
 	glGenBuffers(1, &m_elem_buf);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elem_buf);
+	// Èý½ÇÐÎµÄ¾íÈÆË³Ðò¡ª¡ªÄæÊ±Õë
 	unsigned char elem[6] =
 	{
-		0, 1, 2,
-		0, 2, 3
+		0, 1, 3,
+		1, 2, 3
 	};
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elem), elem, GL_STATIC_DRAW);
 	glBindVertexArray(0);
@@ -106,10 +107,6 @@ void GlHelper::initTexture(int width, int height)
 	glGenTextures(1, &m_frame_tex);
 	glBindTexture(GL_TEXTURE_2D, m_frame_tex);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,	// data.codec_ctx->width, data.codec_ctx->height
 		0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
@@ -117,6 +114,10 @@ void GlHelper::initTexture(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -318,6 +319,13 @@ bool GlHelper::buildProgram()
 		return false;
 	}
 
+	getUniformLocation();
+
+	return true;
+}
+
+void GlHelper::getUniformLocation()
+{
 	m_uniforms[MVP_MATRIX] = glGetUniformLocation(m_program, "mvpMatrix");
 	m_uniforms[FRAME_TEX] = glGetUniformLocation(m_program, "frameTex");
 	m_uniforms[IMAGE_TEX_0] = glGetUniformLocation(m_program, "imageTex_0");
@@ -325,8 +333,12 @@ bool GlHelper::buildProgram()
 
 	m_attribs[VERTICES] = glGetAttribLocation(m_program, "vertex");
 	m_attribs[TEX_COORDS] = glGetAttribLocation(m_program, "texCoord0");
+}
 
-	return true;
+void GlHelper::activeTexture(int unit, GLuint tex_id)
+{
+	glActiveTexture(GL_TEXTURE0 + unit);
+	glBindTexture(GL_TEXTURE_2D, tex_id);
 }
 
 // draw frame in opengl context
@@ -334,16 +346,9 @@ void GlHelper::drawFrame()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_frame_tex);
-	//glUniform1i(m_uniforms[FRAME_TEX], 0);	
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_image_tex[0]);
-	//glUniform1i(m_uniforms[IMAGE_TEX], 1);
-
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, m_image_tex[1]);
+	activeTexture(0, m_frame_tex);
+	activeTexture(1, m_image_tex[0]);
+	activeTexture(2, m_image_tex[1]);
 
 	glBindVertexArray(m_vao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, BUFFER_OFFSET(0));
@@ -355,7 +360,7 @@ void GlHelper::drawFrame()
 // clean up the app data structure
 void GlHelper::clear()
 {
-	//glDeleteVertexArrays(1, &data->m_vao);
+	glDeleteVertexArrays(1, &m_vao);
 	glDeleteBuffers(1, &m_vert_buf);
 	glDeleteBuffers(1, &m_elem_buf);
 	glDeleteTextures(1, &m_frame_tex);

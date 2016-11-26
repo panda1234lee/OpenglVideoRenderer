@@ -34,6 +34,8 @@ public:
 	void initMatrix();
 	void ratioResize(const cv::Mat& src, cv::Mat& dst, int dst_w, int dst_h, float t = 1. );
 	void loadInitTexture(const char *file_path, int width, int height, int index);
+	void activeTexture(int unit, GLuint tex_id);
+	void getUniformLocation();
     void drawFrame();
     void clear();
 
